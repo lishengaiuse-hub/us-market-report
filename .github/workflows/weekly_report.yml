@@ -1,0 +1,112 @@
+# .github/workflows/weekly_report.yml
+# Generates the U.S. Market Sentiment & Macro Report automatically.
+#
+# Triggers:
+#   - Every Friday at 09:00 UTC = 17:00 CST (Beijing Time, after U.S. market close)
+#   - Manual trigger via GitHub Actions UI (workflow_dispatch)
+#
+# Optional secrets (set in repo Settings → Secrets → Actions):
+#   FRED_API_KEY  — Free key from https://fred.stlouisfed.org/docs/api/api_key.html
+#                   Without it, macro data (CPI/NFP/ISM) will show N/A;
+#                   market-priced data (10Y yield, DXY) uses yfinance fallback.
+#
+# Outputs:
+#   - output/index.html  committed back to the repo
+#   - Deployed to GitHub Pages at https://<username>.github.io/<repo>/
+
+name: Weekly Market Report
+
+on:
+  schedule:
+    # Every Friday 09:00 UTC = 17:00 CST (Beijing)
+    - cron: "0 9 * * 5"
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: "Enable verbose logging"
+        required: false
+        default: "false"
+
+# Allow the workflow to push to the repo and deploy to Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  generate-report:
+    name: Fetch data & generate HTML report
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # ── 2. Python setup ──────────────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # ── 3. Install dependencies ───────────────────────────────────
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # ── 4. Run the report pipeline ───────────────────────────────
+      - name: Generate report
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          PYTHONDONTWRITEBYTECODE: "1"
+          PYTHONUNBUFFERED: "1"
+        run: |
+          cd scripts
+          python main.py
+
+      # ── 5. Show output summary ────────────────────────────────────
+      - name: Show generated files
+        run: |
+          echo "── output/ ──"
+          ls -lh output/
+          echo ""
+          echo "── Report size ──"
+          wc -c output/index.html
+
+      # ── 6. Commit output back to repo ────────────────────────────
+      - name: Commit & push output
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/index.html output/data.json
+          git diff --staged --quiet || git commit -m "report: auto-generated $(date -u '+%Y-%m-%d') [skip ci]"
+          git push
+
+      # ── 7. Upload artifact for Pages ─────────────────────────────
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: output/
+
+  # ── Deploy to GitHub Pages ────────────────────────────────────────
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    needs: generate-report
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

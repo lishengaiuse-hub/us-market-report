@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>U.S. Market Report — May 18, 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#0a0c0f;--bg2:#111318;--bg3:#181c23;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8eaf0;--text2:#8b909e;--text3:#555a68;--up:#22d87c;--dn:#f05252;--warn:#f5a623;--info:#4e9eff;--accent:#c8a96e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5}
+.page-header{background:linear-gradient(135deg,#0d0f14,#131720,#0e1119);border-bottom:1px solid var(--border2);padding:28px 32px 24px;position:relative;overflow:hidden}
+.page-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(200,169,110,0.06),transparent);pointer-events:none}
+.header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.report-eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.report-title{font-family:'DM Serif Display',serif;font-size:28px;line-height:1.15;margin-bottom:6px}
+.report-sub{font-size:12px;color:var(--text2)}
+.report-date{text-align:right}
+.date-num{font-family:'DM Serif Display',serif;font-size:22px;color:var(--accent)}
+.date-day{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+.header-sources{margin-top:14px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:.06em}
+.container{max-width:1100px;margin:0 auto;padding:28px 24px 60px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.sec{display:flex;align-items:center;gap:10px;margin:32px 0 14px}
+.sec-num{font-family:'DM Mono',monospace;font-size:10px;background:var(--bg3);border:1px solid var(--border2);color:var(--accent);padding:2px 8px;border-radius:4px;letter-spacing:.08em}
+.sec-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text2)}
+.sec-line{flex:1;height:1px;background:var(--border)}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden}
+.card-sm{padding:12px 14px}
+.card-sub{font-size:11px}
+.badge{display:inline-block;font-size:9px;font-weight:600;padding:1px 7px;border-radius:3px;margin-left:5px;vertical-align:middle;letter-spacing:.04em;text-transform:uppercase}
+.b-up{background:rgba(34,216,124,0.15);color:#22d87c}
+.b-dn{background:rgba(240,82,82,0.15);color:#f05252}
+.b-warn{background:rgba(245,166,35,0.15);color:#f5a623}
+.b-info{background:rgba(78,158,255,0.15);color:#4e9eff}
+.b-neutral{background:rgba(255,255,255,0.06);color:#8b909e}
+.b-accent{background:rgba(200,169,110,0.15);color:#c8a96e}
+.up{color:#22d87c}.dn{color:#f05252}.wn{color:#f5a623}.in{color:#4e9eff}.nt{color:#8b909e}.ac{color:#c8a96e}
+.gauge-name{font-size:12px;font-weight:500;margin-bottom:3px}
+.gauge-val{font-size:18px;font-weight:600;margin-bottom:2px}
+.gauge-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:10px}
+.gbar{display:flex;height:7px;border-radius:4px;overflow:hidden}
+.gs{height:100%}
+.mwrap{position:relative;height:10px}
+.mkr{position:absolute;width:2px;height:10px;background:var(--text);border-radius:1px;transform:translateX(-50%)}
+.glbls{display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-top:3px;font-family:'DM Mono',monospace}
+.rsi-gauge{display:flex;align-items:flex-start;gap:8px;margin:8px 0}
+.rsi-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);flex-shrink:0;width:20px;margin-top:1px}
+.rsi-body{flex:1;min-width:0}
+.rsi-bar{height:6px;border-radius:3px;overflow:hidden;display:flex}
+.rsi-pin-wrap{position:relative;height:8px}
+.rsi-pin{position:absolute;top:0;width:2px;height:8px;background:var(--text);border-radius:1px;transform:translateX(-50%)}
+.rsi-ends{display:flex;justify-content:space-between;font-size:8px;color:var(--text3);margin-top:1px;font-family:'DM Mono',monospace}
+.rsi-val{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;flex-shrink:0;width:28px;text-align:right}
+.sparkline-area{height:72px;margin:10px -16px -16px;position:relative;overflow:hidden}
+.sparkline-lbl{position:absolute;bottom:4px;width:100%;text-align:center;font-size:9px;color:var(--text3);font-family:'DM Mono',monospace}
+.sector-table{width:100%;border-collapse:collapse;font-size:12px}
+.sector-table th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+.sector-table td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.sector-table tr:last-child td{border-bottom:none}
+.sector-table tr:hover td{background:rgba(255,255,255,0.02)}
+.bar-bg{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:visible;position:relative;width:80px}
+.bar-fill{height:100%;border-radius:3px;position:absolute;top:0}
+.pill{display:inline-block;font-size:9px;font-weight:600;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
+.watch-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.watch-item:last-child{border-bottom:none}
+.watch-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.watch-name{font-size:12px;font-weight:500;flex:1.2;min-width:0}
+.watch-note{font-size:11px;color:var(--text2);flex:2;min-width:0;line-height:1.4}
+.watch-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);white-space:nowrap}
+.strategy{background:linear-gradient(135deg,rgba(200,169,110,0.08),rgba(200,169,110,0.03));border:1px solid rgba(200,169,110,0.2);border-radius:12px;padding:16px 20px;display:flex;gap:14px;align-items:flex-start}
+.strategy-icon{font-size:20px;flex-shrink:0}
+.strategy-title{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:4px}
+.strategy-body{font-size:12px;color:#c8b87e;line-height:1.6}
+.doughcon-row{display:flex;gap:6px;margin:10px 0}
+.dc-seg{flex:1;border-radius:6px;padding:7px 4px;text-align:center}
+.dc-seg-num{font-size:13px;font-weight:700}
+.dc-seg-txt{font-size:9px;margin-top:2px}
+.loc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.loc-card{background:var(--bg3);border-radius:8px;padding:8px 10px}
+.loc-name{font-size:11px;font-weight:500;margin-bottom:1px}
+.loc-dist{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace}
+.loc-pct{font-size:13px;font-weight:600;color:var(--up);margin-top:4px}
+.loc-bar{height:3px;background:rgba(255,255,255,0.07);border-radius:2px;margin-top:4px;overflow:hidden}
+.loc-bar-fill{height:100%;border-radius:2px;background:var(--up)}
+.tl-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.tl-item:last-child{border-bottom:none}
+.tl-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);width:80px;flex-shrink:0}
+.tl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tl-desc{font-size:11px;flex:1;color:var(--text2)}
+.tl-val{font-size:11px;font-weight:600;white-space:nowrap}
+.com-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;overflow:hidden}
+.com-icon{font-size:20px;margin-bottom:5px}
+.com-name{font-size:12px;font-weight:600}
+.com-unit{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:7px}
+.com-price{font-size:20px;font-weight:600;line-height:1.1;margin-bottom:2px}
+.com-ytd{font-size:11px;font-weight:500;margin-bottom:7px}
+.com-key{font-size:10px;color:var(--text2);line-height:1.5;margin-bottom:8px}
+.com-spark{height:46px;margin:0 -14px -14px;overflow:hidden;position:relative}
+.com-spark-lbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);text-align:center;padding:2px 0 3px}
+.semi-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;overflow:hidden}
+.semi-spark{height:56px;margin:8px -14px -14px;overflow:hidden}
+.semi-spark-lbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);text-align:center;padding:2px 0 3px}
+.semi-detail{background:var(--bg3);border-radius:8px;padding:10px;margin-top:8px;font-size:10px;color:var(--text2);line-height:1.6}
+.chart-wrap{position:relative}
+.chart-wrap-md{height:270px;margin-bottom:16px}
+.chart-wrap-rsi{height:260px;margin-bottom:16px}
+.page-footer{background:var(--bg2);border-top:1px solid var(--border);padding:20px 32px;text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:.06em;line-height:1.8}
+hr.div{border:none;border-top:1px solid var(--border);margin:28px 0}
+.fade-in{opacity:0;transform:translateY(16px);animation:fadeUp .5s ease forwards}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+.fade-in:nth-child(1){animation-delay:.05s}.fade-in:nth-child(2){animation-delay:.1s}
+.fade-in:nth-child(3){animation-delay:.15s}.fade-in:nth-child(4){animation-delay:.2s}
+.fade-in:nth-child(5){animation-delay:.25s}.fade-in:nth-child(6){animation-delay:.3s}
+@media(max-width:900px){.grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}.report-title{font-size:22px}.container{padding:16px 14px 40px}.page-header{padding:20px 16px}}
+</style>
+</head>
+<body>
+<header class="page-header">
+  <div class="header-top">
+    <div>
+      <p class="report-eyebrow">Daily Briefing · United States</p>
+      <h1 class="report-title">Market Sentiment &amp; Macro Intelligence Report</h1>
+      <p class="report-sub">Indices · Volatility · Macro · Sectors · Semiconductors · Commodities · PizzINT</p>
+    </div>
+    <div class="report-date">
+      <p class="date-num">May 18, 2026</p>
+      <p class="date-day">MONDAY</p>
+    </div>
+  </div>
+  <p class="header-sources">Sources: yfinance · FRED · alternative.me · pizzint.watch · CBOE · BLS · ISM · CME</p>
+</header>
+<div class="container">
+
+<div class="sec"><span class="sec-num">①</span><span class="sec-title">Pentagon Pizza Index — OSINT Geopolitical Tension</span><div class="sec-line"></div></div>
+<div class="card fade-in">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+    <div>
+      <p style="font-size:15px;font-weight:600;margin-bottom:3px">
+        Pentagon Pizza Index <span class="badge b-up">轻微异常</span>
+      </p>
+      <p style="font-size:11px;color:var(--text2)">追踪五角大楼周边披萨店 Google Maps 实时客流 vs. 历史基线</p>
+      <p style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:3px">
+        May 18, 2026 · pizzint.watch / @pizzintwatch
+      </p>
+    </div>
+    <div style="text-align:center;flex-shrink:0">
+      <div style="font-family:'DM Serif Display',serif;font-size:52px;line-height:1;color:#22d87c">4</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;color:#22d87c">DOUGHCON</div>
+    </div>
+  </div>
+  <div class="doughcon-row"><div class="dc-seg" style="background:#501313"><p class="dc-seg-num" style="color:#F7C1C1">1</p><p class="dc-seg-txt" style="color:#F7C1C1">最高</p></div><div class="dc-seg" style="background:#A32D2D"><p class="dc-seg-num" style="color:#FCEBEB">2</p><p class="dc-seg-txt" style="color:#FCEBEB">极端</p></div><div class="dc-seg" style="background:#BA7517"><p class="dc-seg-num" style="color:#FAC775">3</p><p class="dc-seg-txt" style="color:#FAC775">显著</p></div><div class="dc-seg" style="background:rgba(34,216,124,0.2)" style="outline:2px solid rgba(255,255,255,0.6);outline-offset:2px"><p class="dc-seg-num" style="color:#22d87c">4▲</p><p class="dc-seg-txt" style="color:#22d87c">轻微</p></div><div class="dc-seg" style="background:rgba(255,255,255,0.05)"><p class="dc-seg-num" style="color:#8b909e">5</p><p class="dc-seg-txt" style="color:#8b909e">正常</p></div></div>
+  <div class="grid-2" style="margin-top:10px">
+    <div>
+      <p style="font-size:11px;font-weight:500;margin-bottom:8px">五角大楼周边监测点状态</p>
+      <div class="loc-grid">
+        <div class="loc-card"><p class="loc-name">Extreme Pizza</p><p class="loc-dist">0.5mi · 最近</p>
+          <p class="loc-pct">~100%</p>
+          <div class="loc-bar"><div class="loc-bar-fill" style="width:40%"></div></div></div>
+        <div class="loc-card"><p class="loc-name">District Pizza Palace</p><p class="loc-dist">1.0mi</p>
+          <p class="loc-pct">~100%</p>
+          <div class="loc-bar"><div class="loc-bar-fill" style="width:40%"></div></div></div>
+        <div class="loc-card"><p class="loc-name">Domino's Pizza</p><p class="loc-dist">1.4mi</p>
+          <p class="loc-pct">~100%</p>
+          <div class="loc-bar"><div class="loc-bar-fill"></div></div></div>
+        <div class="loc-card"><p class="loc-name">Pizzato Pizza</p><p class="loc-dist">2.2mi</p>
+          <p class="loc-pct">~100%</p>
+          <div class="loc-bar"><div class="loc-bar-fill"></div></div></div>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:11px;font-weight:500;margin-bottom:8px">历史关键信号</p>
+      <div class="tl-item"><span class="tl-date">Feb 22, 2026</span><div class="tl-dot" style="background:#f05252"></div>
+        <span class="tl-desc">DOUGHCON 1 → 6天后美伊战争爆发</span><span class="tl-val dn">+2,000%</span></div>
+      <div class="tl-item"><span class="tl-date">Jun 2025</span><div class="tl-dot" style="background:#f05252"></div>
+        <span class="tl-desc">4店飙升 → 以色列对伊朗重大打击</span><span class="tl-val dn">+200–400%</span></div>
+      <div class="tl-item"><span class="tl-date">Jan 2, 2026</span><div class="tl-dot" style="background:#f5a623"></div>
+        <span class="tl-desc">DOUGHCON 4 → 次日对委内瑞拉打击</span><span class="tl-val wn">轻微</span></div>
+      <div class="tl-item"><span class="tl-date">Aug 1, 1990</span><div class="tl-dot" style="background:#555"></div>
+        <span class="tl-desc">CIA单夜21个披萨 → 伊拉克入侵科威特</span><span class="tl-val nt">起源</span></div>
+      <div style="background:rgba(34,216,124,0.07);border:1px solid rgba(34,216,124,0.15);border-radius:8px;padding:10px 12px;margin-top:8px">
+        <p style="font-size:11px;font-weight:500;color:var(--up);margin-bottom:3px">DOUGHCON 4 — 当前解读</p>
+        <p style="font-size:10px;color:var(--text2)">轻微异常. 活动正常，短期升级风险相对可控。</p>
+      </div>
+      <p style="font-size:9px;color:var(--text3);margin-top:8px">⚠️ 非官方OSINT指标，相关性≠因果性，不构成任何决策依据。</p>
+    </div>
+  </div>
+</div>
+
+<div class="sec"><span class="sec-num">②</span><span class="sec-title">Index Snapshot — 10-Year Trend</span><div class="sec-line"></div></div>
+
+<div class="grid-2 fade-in">
+  
+    <div class="card" style="padding-bottom:0">
+      <p class="card-name" style="color:#22d87c;font-size:16px">S&P 500</p>
+      <p style="font-family:'DM Serif Display',serif;font-size:30px;margin:4px 0 2px">
+        7,408.50 <span style="font-size:16px;color:var(--dn)">▽ 1.24%</span>
+      </p>
+      <p class="card-sub">P/E: <strong>N/A</strong> <span class="badge b-warn">High Valuation</span></p>
+      <p class="card-sub" style="margin-top:3px">
+        RSI(14): <strong class="wn">67.15</strong> <span class="badge b-warn">High</span>
+      </p>
+      <div class="sparkline-area"><canvas id="spxChart"></canvas></div>
+      <p class="sparkline-lbl">10-Year Trend (illustrative)</p>
+    </div>
+  
+    <div class="card" style="padding-bottom:0">
+      <p class="card-name" style="color:#4e9eff;font-size:16px">Nasdaq 100</p>
+      <p style="font-family:'DM Serif Display',serif;font-size:30px;margin:4px 0 2px">
+        29,125.20 <span style="font-size:16px;color:var(--dn)">▽ 1.54%</span>
+      </p>
+      <p class="card-sub">P/E: <strong>N/A</strong> <span class="badge b-warn">High Valuation</span></p>
+      <p class="card-sub" style="margin-top:3px">
+        RSI(14): <strong class="dn">71.01</strong> <span class="badge b-dn">Overbought</span>
+      </p>
+      <div class="sparkline-area"><canvas id="ndxChart"></canvas></div>
+      <p class="sparkline-lbl">10-Year Trend (illustrative)</p>
+    </div>
+</div>
+
+<div class="sec"><span class="sec-num">③</span><span class="sec-title">Sentiment &amp; Volatility Gauges</span><div class="sec-line"></div></div>
+
+<div class="grid-2 fade-in" style="gap:10px">
+  <div class="card card-sm gauge">
+    <p class="gauge-name">S&amp;P 500 RSI(14) <span class="badge b-warn">High</span></p>
+    <p class="gauge-val wn">67.15</p>
+    <p class="gauge-date">May 18, 2026</p>
+    <div class="gbar">
+      <div class="gs" style="width:30%;background:#f05252"></div>
+      <div class="gs" style="width:40%;background:#2a3040"></div>
+      <div class="gs" style="width:30%;background:#22d87c"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:67.2%"></div></div>
+    <div class="glbls"><span>Oversold &lt;30</span><span>Neutral 30–70</span><span>Overbought &gt;70</span></div>
+  </div>
+  <div class="card card-sm gauge">
+    <p class="gauge-name">Nasdaq 100 RSI(14) <span class="badge b-dn">Overbought</span></p>
+    <p class="gauge-val dn">71.01</p>
+    <p class="gauge-date">May 18, 2026</p>
+    <div class="gbar">
+      <div class="gs" style="width:30%;background:#f05252"></div>
+      <div class="gs" style="width:40%;background:#2a3040"></div>
+      <div class="gs" style="width:30%;background:#22d87c"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:71.0%"></div></div>
+    <div class="glbls"><span>Oversold &lt;30</span><span>Neutral 30–70</span><span>Overbought &gt;70</span></div>
+  </div>
+  <div class="card card-sm gauge">
+    <p class="gauge-name">VIX Volatility Index <span class="badge b-neutral">Normal</span></p>
+    <p class="gauge-val wn">18.43</p>
+    <p class="gauge-date">May 18, 2026</p>
+    <div class="gbar">
+      <div class="gs" style="width:25%;background:#22d87c"></div>
+      <div class="gs" style="width:25%;background:#f5a623"></div>
+      <div class="gs" style="width:25%;background:#f07050"></div>
+      <div class="gs" style="width:25%;background:#f05252"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:46.1%"></div></div>
+    <div class="glbls"><span>Euphoria &lt;12</span><span>Normal 12–20</span><span>Fear 20–30</span><span>Panic &gt;30</span></div>
+  </div>
+  <div class="card card-sm gauge">
+    <p class="gauge-name">VXN Nasdaq Volatility <span class="badge b-warn">Rising Fear</span></p>
+    <p class="gauge-val dn">25.33</p>
+    <p class="gauge-date">May 18, 2026</p>
+    <div class="gbar">
+      <div class="gs" style="width:25%;background:#22d87c"></div>
+      <div class="gs" style="width:25%;background:#f5a623"></div>
+      <div class="gs" style="width:25%;background:#f07050"></div>
+      <div class="gs" style="width:25%;background:#f05252"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:63.3%"></div></div>
+    <div class="glbls"><span>Euphoria &lt;12</span><span>Normal 12–20</span><span>Fear 20–30</span><span>Panic &gt;30</span></div>
+  </div>
+</div>
+<div class="card card-sm gauge fade-in" style="margin-top:10px">
+  <p class="gauge-name">CNN Fear &amp; Greed Index <span class="badge b-up">Greed</span></p>
+  <p class="gauge-val up">63</p>
+  <p class="gauge-date">May 18, 2026</p>
+  <div class="gbar">
+    <div class="gs" style="width:25%;background:#f05252"></div>
+    <div class="gs" style="width:20%;background:#f5a623"></div>
+    <div class="gs" style="width:11%;background:#556"></div>
+    <div class="gs" style="width:20%;background:#7aca56"></div>
+    <div class="gs" style="width:24%;background:#22d87c"></div>
+  </div>
+  <div class="mwrap"><div class="mkr" style="left:63.0%"></div></div>
+  <div class="glbls"><span>Extreme Fear 0–24</span><span>Fear 25–44</span><span>Neutral 45–55</span><span>Greed 56–75</span><span>Extreme Greed &gt;75</span></div>
+</div>
+
+<hr class="div">
+
+<div class="sec"><span class="sec-num">④</span><span class="sec-title">Monetary Policy</span><div class="sec-line"></div></div>
+<div class="grid-2 fade-in">
+  <div class="card card-sm gauge">
+    <p class="gauge-name">Fed Funds Rate <span class="badge b-neutral">On Hold</span></p>
+    <p class="gauge-val nt">3.62%</p>
+    <p class="gauge-date">2026-04-29</p>
+    <div class="gbar">
+      <div class="gs" style="width:17%;background:#22d87c"></div>
+      <div class="gs" style="width:33%;background:#4e9eff"></div>
+      <div class="gs" style="width:33%;background:#f5a623"></div>
+      <div class="gs" style="width:17%;background:#f05252"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:60.4%"></div></div>
+    <div class="glbls"><span>0–1% 宽松</span><span>1–3% 中性</span><span>3–5% 紧缩</span><span>&gt;5%</span></div>
+  </div>
+  <div class="card card-sm gauge">
+    <p class="gauge-name">CME FedWatch — Implied Rate <span class="badge b-neutral">Futures</span></p>
+    <p class="gauge-val nt">3.625%</p>
+    <p class="gauge-date">May 18, 2026</p>
+    <div class="gbar">
+      <div class="gs" style="width:100%;background:#f05252"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:60.4%"></div></div>
+    <div class="glbls"><span>0% 无降息</span><span>1次降息</span><span>2次+</span></div>
+  </div>
+</div>
+
+<div class="sec"><span class="sec-num">⑤</span><span class="sec-title">Fixed Income &amp; Currency</span><div class="sec-line"></div></div>
+<div class="grid-2 fade-in">
+  <div class="card card-sm gauge">
+    <p class="gauge-name">10-Year Treasury Yield <span class='badge b-dn'>High</span></p>
+    <p class="gauge-val dn">4.59%</p>
+    <p class="gauge-date">2026-05-15</p>
+    <div class="gbar">
+      <div class="gs" style="width:25%;background:#22d87c"></div>
+      <div class="gs" style="width:35%;background:#f5a623"></div>
+      <div class="gs" style="width:25%;background:#f07050"></div>
+      <div class="gs" style="width:15%;background:#f05252"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:76.5%"></div></div>
+    <div class="glbls"><span>&lt;3% 低</span><span>3–4% 正常</span><span>4–5% 偏高</span><span>&gt;5%</span></div>
+  </div>
+  <div class="card card-sm gauge">
+    <p class="gauge-name">DXY 美元指数 <span class="badge b-neutral">Trade-Weighted</span></p>
+    <p class="gauge-val wn">99.27</p>
+    <p class="gauge-date">2026-05-15</p>
+    <div class="gbar">
+      <div class="gs" style="width:25%;background:#22d87c"></div>
+      <div class="gs" style="width:35%;background:#f5a623"></div>
+      <div class="gs" style="width:25%;background:#f07050"></div>
+      <div class="gs" style="width:15%;background:#f05252"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:48.2%"></div></div>
+    <div class="glbls"><span>弱 &lt;95</span><span>95–105</span><span>强 &gt;105</span><span>极强</span></div>
+  </div>
+</div>
+
+<div class="sec"><span class="sec-num">⑥</span><span class="sec-title">Inflation</span><div class="sec-line"></div></div>
+<div class="grid-2 fade-in">
+  <div class="card card-sm gauge">
+    <p class="gauge-name">CPI Headline YoY <span class='badge b-dn'>High</span></p>
+    <p class="gauge-val dn">3.8%</p>
+    <p class="gauge-date">2026-05-12 · Fed目标 2%</p>
+    <div class="gbar">
+      <div class="gs" style="width:20%;background:#22d87c"></div>
+      <div class="gs" style="width:20%;background:#f5a623"></div>
+      <div class="gs" style="width:30%;background:#f07050"></div>
+      <div class="gs" style="width:30%;background:#f05252"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:63.3%"></div></div>
+    <div class="glbls"><span>&lt;2% 达标</span><span>2–3%</span><span>3–4.5% 高</span><span>&gt;4.5%</span></div>
+  </div>
+  <div class="card card-sm gauge">
+    <p class="gauge-name">Core CPI YoY <span class='badge b-warn'>Watch</span></p>
+    <p class="gauge-val wn">2.8%</p>
+    <p class="gauge-date">2026-05-12</p>
+    <div class="gbar">
+      <div class="gs" style="width:20%;background:#22d87c"></div>
+      <div class="gs" style="width:20%;background:#f5a623"></div>
+      <div class="gs" style="width:30%;background:#f07050"></div>
+      <div class="gs" style="width:30%;background:#f05252"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:46.7%"></div></div>
+    <div class="glbls"><span>&lt;2%</span><span>2–3%</span><span>3–4.5%</span><span>&gt;4.5%</span></div>
+  </div>
+</div>
+
+<div class="sec"><span class="sec-num">⑦</span><span class="sec-title">Employment</span><div class="sec-line"></div></div>
+<div class="grid-2 fade-in">
+  <div class="card card-sm gauge">
+    <p class="gauge-name">NFP 非农就业 <span class='badge b-up'>Solid</span></p>
+    <p class="gauge-val up">+115K</p>
+    <p class="gauge-date">2026-05-08 · 失业率 4.3%</p>
+    <div class="gbar">
+      <div class="gs" style="width:20%;background:#f05252"></div>
+      <div class="gs" style="width:30%;background:#f5a623"></div>
+      <div class="gs" style="width:30%;background:#22d87c"></div>
+      <div class="gs" style="width:20%;background:#4e9eff"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:43.0%"></div></div>
+    <div class="glbls"><span>&lt;0 收缩</span><span>0–75K 弱</span><span>75–200K</span><span>&gt;200K 热</span></div>
+  </div>
+  <div class="card card-sm gauge">
+    <p class="gauge-name">初请失业金 Weekly <span class='badge b-up'>Low</span></p>
+    <p class="gauge-val up">200K</p>
+    <p class="gauge-date">2026-05-08</p>
+    <div class="gbar">
+      <div class="gs" style="width:25%;background:#22d87c"></div>
+      <div class="gs" style="width:35%;background:#f5a623"></div>
+      <div class="gs" style="width:25%;background:#f07050"></div>
+      <div class="gs" style="width:15%;background:#f05252"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:25.0%"></div></div>
+    <div class="glbls"><span>&lt;200K 强</span><span>200–250K</span><span>250–350K</span><span>&gt;350K</span></div>
+  </div>
+</div>
+
+<div class="sec"><span class="sec-num">⑧</span><span class="sec-title">ISM PMI — Leading Indicators</span><div class="sec-line"></div></div>
+<div class="grid-2 fade-in">
+  <div class="card card-sm gauge">
+    <p class="gauge-name">ISM 制造业 PMI <span class="badge b-up">Expanding</span></p>
+    <p class="gauge-val up">52.7</p>
+    <p class="gauge-date">2026-05-01</p>
+    <div class="gbar">
+      <div class="gs" style="width:30%;background:#f05252"></div>
+      <div class="gs" style="width:20%;background:#556"></div>
+      <div class="gs" style="width:25%;background:#7aca56"></div>
+      <div class="gs" style="width:25%;background:#22d87c"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:63.5%"></div></div>
+    <div class="glbls"><span>收缩&lt;50</span><span>~50荣枯线</span><span>50–55扩张</span><span>&gt;55强劲</span></div>
+  </div>
+  <div class="card card-sm gauge">
+    <p class="gauge-name">ISM 服务业 PMI <span class="badge b-up">Expanding</span></p>
+    <p class="gauge-val up">53.6</p>
+    <p class="gauge-date">2026-05-05</p>
+    <div class="gbar">
+      <div class="gs" style="width:30%;background:#f05252"></div>
+      <div class="gs" style="width:20%;background:#556"></div>
+      <div class="gs" style="width:25%;background:#7aca56"></div>
+      <div class="gs" style="width:25%;background:#22d87c"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:68.0%"></div></div>
+    <div class="glbls"><span>收缩&lt;50</span><span>~50荣枯线</span><span>50–55扩张</span><span>&gt;55强劲</span></div>
+  </div>
+</div>
+
+<hr class="div">
+<div class="sec"><span class="sec-num">⑨</span><span class="sec-title">S&P 500 Sector Performance — GICS 10 Sectors YTD</span><div class="sec-line"></div></div>
+
+<div class="card fade-in" style="margin-bottom:12px">
+  <div class="chart-wrap chart-wrap-md"><canvas id="sectorChart"></canvas></div>
+</div>
+<div class="card fade-in">
+  <table class="sector-table">
+    <thead>
+      <tr>
+        <th>ETF</th><th>板块</th><th style="text-align:right">价格</th>
+        <th style="text-align:right">YTD</th><th>走势</th>
+        <th>RSI(14)</th><th>动能</th><th>技术判断</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><strong>XLE</strong></td>
+          <td style="color:var(--text2)">能源</td>
+          <td style="text-align:right;color:var(--up);font-weight:600">
+            $59.44</td>
+          <td style="text-align:right;color:var(--up);font-weight:600">
+            +31.1%</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:100%;background:#22d87c;"></div></div></td>
+          <td style="font-family:'DM Mono',monospace;color:nt;font-weight:500">59.1</td>
+          <td><span class="pill b-up">Leading</span></td>
+          <td style="font-size:10px;color:var(--text2)">中性区间</td>
+        </tr>
+        <tr>
+          <td><strong>XLK</strong></td>
+          <td style="color:var(--text2)">信息技术</td>
+          <td style="text-align:right;color:var(--up);font-weight:600">
+            $176.26</td>
+          <td style="text-align:right;color:var(--up);font-weight:600">
+            +22.3%</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:89%;background:#22d87c;"></div></div></td>
+          <td style="font-family:'DM Mono',monospace;color:dn;font-weight:500">72.5</td>
+          <td><span class="pill b-up">Leading</span></td>
+          <td style="font-size:10px;color:var(--text2)">⚠️ 超买，注意回调</td>
+        </tr>
+        <tr>
+          <td><strong>XLP</strong></td>
+          <td style="color:var(--text2)">必需消费</td>
+          <td style="text-align:right;color:var(--up);font-weight:600">
+            $84.64</td>
+          <td style="text-align:right;color:var(--up);font-weight:600">
+            +9.6%</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:38%;background:#22d87c;"></div></div></td>
+          <td style="font-family:'DM Mono',monospace;color:nt;font-weight:500">57.5</td>
+          <td><span class="pill b-up">Leading</span></td>
+          <td style="font-size:10px;color:var(--text2)">中性区间</td>
+        </tr>
+        <tr>
+          <td><strong>XLB</strong></td>
+          <td style="color:var(--text2)">材料</td>
+          <td style="text-align:right;color:var(--up);font-weight:600">
+            $50.30</td>
+          <td style="text-align:right;color:var(--up);font-weight:600">
+            +9.6%</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:38%;background:#22d87c;"></div></div></td>
+          <td style="font-family:'DM Mono',monospace;color:nt;font-weight:500">41.5</td>
+          <td><span class="pill b-warn">Weakening</span></td>
+          <td style="font-size:10px;color:var(--text2)">中性区间</td>
+        </tr>
+        <tr>
+          <td><strong>XLI</strong></td>
+          <td style="color:var(--text2)">工业</td>
+          <td style="text-align:right;color:var(--up);font-weight:600">
+            $171.40</td>
+          <td style="text-align:right;color:var(--up);font-weight:600">
+            +8.8%</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:35%;background:#22d87c;"></div></div></td>
+          <td style="font-family:'DM Mono',monospace;color:nt;font-weight:500">48.5</td>
+          <td><span class="pill b-warn">Weakening</span></td>
+          <td style="font-size:10px;color:var(--text2)">中性区间</td>
+        </tr>
+        <tr>
+          <td><strong>XLU</strong></td>
+          <td style="color:var(--text2)">公用事业</td>
+          <td style="text-align:right;color:var(--up);font-weight:600">
+            $43.87</td>
+          <td style="text-align:right;color:var(--up);font-weight:600">
+            +2.3%</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:9%;background:#22d87c;"></div></div></td>
+          <td style="font-family:'DM Mono',monospace;color:in;font-weight:500">34.5</td>
+          <td><span class="pill b-warn">Weakening</span></td>
+          <td style="font-size:10px;color:var(--text2)">RSI偏低，趋向超卖</td>
+        </tr>
+        <tr>
+          <td><strong>XLC</strong></td>
+          <td style="color:var(--text2)">通信</td>
+          <td style="text-align:right;color:var(--dn);font-weight:600">
+            $116.08</td>
+          <td style="text-align:right;color:var(--dn);font-weight:600">
+            -0.4%</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:2%;background:#f05252;right:0;left:auto;"></div></div></td>
+          <td style="font-family:'DM Mono',monospace;color:nt;font-weight:500">50.3</td>
+          <td><span class="pill b-warn">Weakening</span></td>
+          <td style="font-size:10px;color:var(--text2)">中性区间</td>
+        </tr>
+        <tr>
+          <td><strong>XLY</strong></td>
+          <td style="color:var(--text2)">非必需消费</td>
+          <td style="text-align:right;color:var(--dn);font-weight:600">
+            $116.53</td>
+          <td style="text-align:right;color:var(--dn);font-weight:600">
+            -1.3%</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:5%;background:#f05252;right:0;left:auto;"></div></div></td>
+          <td style="font-family:'DM Mono',monospace;color:nt;font-weight:500">46.9</td>
+          <td><span class="pill b-warn">Weakening</span></td>
+          <td style="font-size:10px;color:var(--text2)">中性区间</td>
+        </tr>
+        <tr>
+          <td><strong>XLV</strong></td>
+          <td style="color:var(--text2)">医疗</td>
+          <td style="text-align:right;color:var(--dn);font-weight:600">
+            $145.10</td>
+          <td style="text-align:right;color:var(--dn);font-weight:600">
+            -6.3%</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:25%;background:#f05252;right:0;left:auto;"></div></div></td>
+          <td style="font-family:'DM Mono',monospace;color:nt;font-weight:500">47.2</td>
+          <td><span class="pill b-warn">Weakening</span></td>
+          <td style="font-size:10px;color:var(--text2)">中性区间</td>
+        </tr>
+        <tr>
+          <td><strong>XLF</strong></td>
+          <td style="color:var(--text2)">金融</td>
+          <td style="text-align:right;color:var(--dn);font-weight:600">
+            $51.10</td>
+          <td style="text-align:right;color:var(--dn);font-weight:600">
+            -6.5%</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:26%;background:#f05252;right:0;left:auto;"></div></div></td>
+          <td style="font-family:'DM Mono',monospace;color:nt;font-weight:500">46.8</td>
+          <td><span class="pill b-warn">Weakening</span></td>
+          <td style="font-size:10px;color:var(--text2)">中性区间</td>
+        </tr></tbody>
+  </table>
+</div>
+<script>
+(function(){
+  const sLabels=["XLE \u80fd\u6e90", "XLK \u4fe1\u606f\u6280\u672f", "XLP \u5fc5\u9700\u6d88\u8d39", "XLB \u6750\u6599", "XLI \u5de5\u4e1a", "XLU \u516c\u7528\u4e8b\u4e1a", "XLC \u901a\u4fe1", "XLY \u975e\u5fc5\u9700\u6d88\u8d39", "XLV \u533b\u7597", "XLF \u91d1\u878d"];
+  const sYtd=[31.06, 22.3, 9.56, 9.55, 8.8, 2.31, -0.38, -1.34, -6.31, -6.49];
+  const sColors=["#22d87c", "#22d87c", "#22d87c", "#22d87c", "#22d87c", "#22d87c", "#f05252", "#f05252", "#f05252", "#f05252"];
+  new Chart(document.getElementById('sectorChart'),{
+    type:'bar',
+    data:{labels:sLabels,datasets:[{label:'YTD %',data:sYtd,backgroundColor:sColors,borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+(c.raw>=0?'+':'')+c.raw.toFixed(1)+'%'}}},
+      scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{callback:v=>(v>=0?'+':'')+v+'%'}},
+               y:{grid:{display:false},border:{display:false}}}
+    },
+    plugins:[{afterDraw(c){
+      const ctx=c.ctx,xs=c.scales.x,ys=c.scales.y;
+      const x0=xs.getPixelForValue(0);
+      ctx.save();ctx.beginPath();ctx.moveTo(x0,ys.top);ctx.lineTo(x0,ys.bottom);
+      ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.stroke();ctx.restore();
+    }}]
+  });
+  // RSI chart
+  const rLabels=["XLE \u80fd\u6e90", "XLK \u4fe1\u606f\u6280\u672f", "XLP \u5fc5\u9700\u6d88\u8d39", "XLB \u6750\u6599", "XLI \u5de5\u4e1a", "XLU \u516c\u7528\u4e8b\u4e1a", "XLC \u901a\u4fe1", "XLY \u975e\u5fc5\u9700\u6d88\u8d39", "XLV \u533b\u7597", "XLF \u91d1\u878d"];
+  const rVals=[59.14, 72.54, 57.47, 41.47, 48.51, 34.53, 50.27, 46.94, 47.19, 46.76];
+  const rColors=["#556677", "#f05252", "#556677", "#556677", "#556677", "#4e9eff", "#556677", "#556677", "#556677", "#556677"];
+  new Chart(document.getElementById('rsiChart'),{
+    type:'bar',
+    data:{labels:rLabels,datasets:[{label:'RSI(14)',data:rVals,backgroundColor:rColors,borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' RSI: '+c.raw.toFixed(1)}}},
+      scales:{x:{min:0,max:100,grid:{color:'rgba(255,255,255,0.05)'}},y:{grid:{display:false},border:{display:false}}}
+    },
+    plugins:[{afterDraw(c){
+      const ctx=c.ctx,xs=c.scales.x,ys=c.scales.y;
+      [{v:70,col:'rgba(240,82,82,0.7)',lbl:'超买 70'},{v:30,col:'rgba(78,158,255,0.7)',lbl:'超卖 30'}].forEach(o=>{
+        const x=xs.getPixelForValue(o.v);
+        ctx.save();ctx.beginPath();ctx.moveTo(x,ys.top);ctx.lineTo(x,ys.bottom);
+        ctx.strokeStyle=o.col;ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.stroke();
+        ctx.fillStyle=o.col;ctx.font='bold 9px monospace';ctx.fillText(o.lbl,x+3,ys.top+11);ctx.restore();
+      });
+    }}]
+  });
+})();
+</script>
+
+<div class="sec"><span class="sec-num">⑨-B</span><span class="sec-title">Semiconductor Special Focus — 半导体专题</span><div class="sec-line"></div></div>
+
+<div class="grid-2 fade-in">
+  <div class="semi-card">
+    <p style="font-size:14px;font-weight:600;color:var(--info);margin-bottom:3px">SOX · Philadelphia Semiconductor Index</p>
+    <p style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:8px">May 18, 2026</p>
+    <p style="font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:4px">11,588</p>
+    <p style="font-size:12px;color:var(--up);font-weight:500;margin-bottom:3px">RSI: 65.1 <span class="badge b-warn">High</span></p>
+    
+    <div class="rsi-gauge">
+      <span class="rsi-lbl">RSI</span>
+      <div class="rsi-body">
+        <div class="rsi-bar">
+          <div class="gs" style="width:30%;background:#f05252"></div>
+          <div class="gs" style="width:40%;background:#2a3040"></div>
+          <div class="gs" style="width:30%;background:#22d87c"></div>
+        </div>
+        <div class="rsi-pin-wrap">
+          <div class="rsi-pin" style="left:65.1%"></div>
+        </div>
+        <div class="rsi-ends"><span>0</span><span>30</span><span>70</span><span>100</span></div>
+      </div>
+      <span class="rsi-val" style="color:#f5a623">65.1</span>
+    </div>
+    <div class="semi-spark"><canvas id="soxChart"></canvas></div>
+    <p class="semi-spark-lbl">12-Month Trend (illustrative)</p>
+  </div>
+  <div class="semi-card">
+    <p style="font-size:14px;font-weight:600;color:var(--info);margin-bottom:3px">SOXX · iShares PHLX Semiconductor ETF</p>
+    <p style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:8px">May 18, 2026</p>
+    <p style="font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:4px">$508.52</p>
+    <p style="font-size:12px;color:var(--up);font-weight:500;margin-bottom:3px">
+      YTD: +62.2% &nbsp;·&nbsp;
+      52W: $199.93 – $533.74
+    </p>
+    
+    <div class="rsi-gauge">
+      <span class="rsi-lbl">RSI</span>
+      <div class="rsi-body">
+        <div class="rsi-bar">
+          <div class="gs" style="width:30%;background:#f05252"></div>
+          <div class="gs" style="width:40%;background:#2a3040"></div>
+          <div class="gs" style="width:30%;background:#22d87c"></div>
+        </div>
+        <div class="rsi-pin-wrap">
+          <div class="rsi-pin" style="left:64.8%"></div>
+        </div>
+        <div class="rsi-ends"><span>0</span><span>30</span><span>70</span><span>100</span></div>
+      </div>
+      <span class="rsi-val" style="color:#f5a623">64.8</span>
+    </div>
+    <div class="semi-detail">
+      <span style="color:var(--text)">核心驱动:</span> AI算力需求 · NVDA/AVGO/TSM主导 · 数据中心资本开支<br>
+      <span style="color:var(--text)">主要风险:</span> 技术中性，关注成交量 · 估值 · 地缘科技管制
+    </div>
+    <div class="semi-spark"><canvas id="soxxChart"></canvas></div>
+    <p class="semi-spark-lbl">12-Month Trend (illustrative)</p>
+  </div>
+</div>
+
+<hr class="div">
+<div class="sec"><span class="sec-num">⑩</span><span class="sec-title">Sector RSI Summary — 超买 / 超卖排名</span><div class="sec-line"></div></div>
+<div class="card fade-in"><div class="chart-wrap chart-wrap-rsi"><canvas id="rsiChart"></canvas></div></div>
+
+<hr class="div">
+<div class="sec"><span class="sec-num">⑪</span><span class="sec-title">Commodities — 黄金·白银·稀土·煤炭·棉花·大豆</span><div class="sec-line"></div></div>
+<div class="grid-3 fade-in">
+  <div class="com-card">
+    <p class="com-icon">🥇</p>
+    <p class="com-name">黄金 Gold</p>
+    <p class="com-unit">GC=F · USD/oz</p>
+    <p class="com-price up">$4,555.60</p>
+    <p class="com-ytd up">YTD +5.6% <span class="badge b-up">涨</span></p>
+    <div class="rsi-gauge">
+      <span class="rsi-lbl">RSI</span>
+      <div class="rsi-body">
+        <div class="rsi-bar">
+          <div class="gs" style="width:30%;background:#f05252"></div>
+          <div class="gs" style="width:40%;background:#2a3040"></div>
+          <div class="gs" style="width:30%;background:#22d87c"></div>
+        </div>
+        <div class="rsi-pin-wrap"><div class="rsi-pin" style="left:41.0%"></div></div>
+        <div class="rsi-ends"><span>0</span><span>30</span><span>70</span><span>100</span></div>
+      </div>
+      <span class="rsi-val" style="color:#8b909e">41.0</span>
+    </div>
+    <p class="com-key">中性区间 · 52周波动显著 · May 18, 2026</p>
+    <div class="com-spark"><canvas id="com_GC_F"></canvas></div>
+    <p class="com-spark-lbl">12-Month Trend</p>
+  </div>
+  <div class="com-card">
+    <p class="com-icon">🥈</p>
+    <p class="com-name">白银 Silver</p>
+    <p class="com-unit">SI=F · USD/oz</p>
+    <p class="com-price up">$77.12</p>
+    <p class="com-ytd up">YTD +9.3% <span class="badge b-up">涨</span></p>
+    <div class="rsi-gauge">
+      <span class="rsi-lbl">RSI</span>
+      <div class="rsi-body">
+        <div class="rsi-bar">
+          <div class="gs" style="width:30%;background:#f05252"></div>
+          <div class="gs" style="width:40%;background:#2a3040"></div>
+          <div class="gs" style="width:30%;background:#22d87c"></div>
+        </div>
+        <div class="rsi-pin-wrap"><div class="rsi-pin" style="left:47.8%"></div></div>
+        <div class="rsi-ends"><span>0</span><span>30</span><span>70</span><span>100</span></div>
+      </div>
+      <span class="rsi-val" style="color:#8b909e">47.8</span>
+    </div>
+    <p class="com-key">中性区间 · 52周波动显著 · May 18, 2026</p>
+    <div class="com-spark"><canvas id="com_SI_F"></canvas></div>
+    <p class="com-spark-lbl">12-Month Trend</p>
+  </div>
+  <div class="com-card">
+    <p class="com-icon">⚗️</p>
+    <p class="com-name">稀土 Rare Earth</p>
+    <p class="com-unit">REMX · USD (ETF)</p>
+    <p class="com-price up">$96.57</p>
+    <p class="com-ytd up">YTD +25.8% <span class="badge b-up">涨</span></p>
+    <div class="rsi-gauge">
+      <span class="rsi-lbl">RSI</span>
+      <div class="rsi-body">
+        <div class="rsi-bar">
+          <div class="gs" style="width:30%;background:#f05252"></div>
+          <div class="gs" style="width:40%;background:#2a3040"></div>
+          <div class="gs" style="width:30%;background:#22d87c"></div>
+        </div>
+        <div class="rsi-pin-wrap"><div class="rsi-pin" style="left:43.6%"></div></div>
+        <div class="rsi-ends"><span>0</span><span>30</span><span>70</span><span>100</span></div>
+      </div>
+      <span class="rsi-val" style="color:#8b909e">43.6</span>
+    </div>
+    <p class="com-key">中性区间 · 52周波动显著 · May 18, 2026</p>
+    <div class="com-spark"><canvas id="com_REMX"></canvas></div>
+    <p class="com-spark-lbl">12-Month Trend</p>
+  </div>
+  <div class="com-card">
+    <p class="com-icon">⚫</p>
+    <p class="com-name">煤炭 Thermal Coal</p>
+    <p class="com-unit">BTU · USD/share (Peabody Energy)</p>
+    <p class="com-price dn">$23.77</p>
+    <p class="com-ytd dn">YTD -22.4% <span class="badge b-dn">跌</span></p>
+    <div class="rsi-gauge">
+      <span class="rsi-lbl">RSI</span>
+      <div class="rsi-body">
+        <div class="rsi-bar">
+          <div class="gs" style="width:30%;background:#f05252"></div>
+          <div class="gs" style="width:40%;background:#2a3040"></div>
+          <div class="gs" style="width:30%;background:#22d87c"></div>
+        </div>
+        <div class="rsi-pin-wrap"><div class="rsi-pin" style="left:33.1%"></div></div>
+        <div class="rsi-ends"><span>0</span><span>30</span><span>70</span><span>100</span></div>
+      </div>
+      <span class="rsi-val" style="color:#4e9eff">33.1</span>
+    </div>
+    <p class="com-key">RSI偏低，趋向超卖 · 52周波动显著 · May 18, 2026</p>
+    <div class="com-spark"><canvas id="com_BTU"></canvas></div>
+    <p class="com-spark-lbl">12-Month Trend</p>
+  </div>
+  <div class="com-card">
+    <p class="com-icon">🌿</p>
+    <p class="com-name">棉花 Cotton #2</p>
+    <p class="com-unit">CT=F · cents/lb</p>
+    <p class="com-price up">80.61¢</p>
+    <p class="com-ytd up">YTD +25.9% <span class="badge b-up">涨</span></p>
+    <div class="rsi-gauge">
+      <span class="rsi-lbl">RSI</span>
+      <div class="rsi-body">
+        <div class="rsi-bar">
+          <div class="gs" style="width:30%;background:#f05252"></div>
+          <div class="gs" style="width:40%;background:#2a3040"></div>
+          <div class="gs" style="width:30%;background:#22d87c"></div>
+        </div>
+        <div class="rsi-pin-wrap"><div class="rsi-pin" style="left:53.0%"></div></div>
+        <div class="rsi-ends"><span>0</span><span>30</span><span>70</span><span>100</span></div>
+      </div>
+      <span class="rsi-val" style="color:#8b909e">53.0</span>
+    </div>
+    <p class="com-key">中性区间 · 52周波动显著 · May 18, 2026</p>
+    <div class="com-spark"><canvas id="com_CT_F"></canvas></div>
+    <p class="com-spark-lbl">12-Month Trend</p>
+  </div>
+  <div class="com-card">
+    <p class="com-icon">🫘</p>
+    <p class="com-name">大豆 Soybeans</p>
+    <p class="com-unit">ZS=F · USD/bu</p>
+    <p class="com-price up">$12.00</p>
+    <p class="com-ytd up">YTD +14.3% <span class="badge b-up">涨</span></p>
+    <div class="rsi-gauge">
+      <span class="rsi-lbl">RSI</span>
+      <div class="rsi-body">
+        <div class="rsi-bar">
+          <div class="gs" style="width:30%;background:#f05252"></div>
+          <div class="gs" style="width:40%;background:#2a3040"></div>
+          <div class="gs" style="width:30%;background:#22d87c"></div>
+        </div>
+        <div class="rsi-pin-wrap"><div class="rsi-pin" style="left:48.3%"></div></div>
+        <div class="rsi-ends"><span>0</span><span>30</span><span>70</span><span>100</span></div>
+      </div>
+      <span class="rsi-val" style="color:#8b909e">48.3</span>
+    </div>
+    <p class="com-key">中性区间 · 52周波动显著 · May 18, 2026</p>
+    <div class="com-spark"><canvas id="com_ZS_F"></canvas></div>
+    <p class="com-spark-lbl">12-Month Trend</p>
+  </div></div><script>(function(){
+    sparkline('com_GC_F', [3220.0, 3431.2, 3340.1, 3313.4, 3780.6, 4118.4, 4165.2, 4325.6, 4861.4, 5167.4, 4825.0, 4555.6], '#22d87c', 'rgba(34,216,124,0.12)');
+    sparkline('com_SI_F', [32.39, 36.28, 38.06, 37.26, 44.19, 48.38, 52.92, 70.13, 76.53, 85.07, 79.39, 77.12], '#22d87c', 'rgba(34,216,124,0.12)');
+    sparkline('com_REMX', [38.96, 38.93, 49.9, 55.59, 60.06, 72.16, 72.21, 73.92, 87.06, 96.49, 99.01, 96.57], '#22d87c', 'rgba(34,216,124,0.12)');
+    sparkline('com_BTU', [15.07, 13.49, 15.77, 15.94, 25.69, 28.22, 27.18, 30.61, 34.16, 34.52, 27.69, 23.77], '#f05252', 'rgba(240,82,82,0.1)');
+    sparkline('com_CT_F', [66.63, 65.36, 67.25, 66.25, 64.32, 64.07, 62.77, 64.27, 62.24, 65.3, 74.53, 80.61], '#22d87c', 'rgba(34,216,124,0.12)');
+    sparkline('com_ZS_F', [11.0, 11.0, 10.0, 10.0, 10.0, 10.0, 11.0, 10.0, 11.0, 12.0, 12.0, 12.0], '#22d87c', 'rgba(34,216,124,0.12)');})();</script>
+
+<hr class="div">
+<div class="sec"><span class="sec-num">⑫</span><span class="sec-title">Priority Watchlist &amp; Strategy</span><div class="sec-line"></div></div>
+
+<div class="card fade-in">
+    <div class="watch-item">
+      <div class="watch-dot" style="background:var(--info)"></div>
+      <p class="watch-name">PizzINT DOUGHCON 4</p>
+      <p class="watch-note">五角大楼活动正常，短期升级风险可控</p>
+      <span class="watch-date">May 18, 2026</span>
+    </div>
+    <div class="watch-item">
+      <div class="watch-dot" style="background:var(--dn)"></div>
+      <p class="watch-name">CPI 3.8% 高于目标</p>
+      <p class="watch-note">通胀顽固，Fed降息压力增大，高估值股受压</p>
+      <span class="watch-date">May 18, 2026</span>
+    </div>
+    <div class="watch-item">
+      <div class="watch-dot" style="background:var(--dn)"></div>
+      <p class="watch-name">10Y国债收益率 4.59%</p>
+      <p class="watch-note">高利率持续压制成长股和高P/E板块估值</p>
+      <span class="watch-date">May 18, 2026</span>
+    </div>
+    <div class="watch-item">
+      <div class="watch-dot" style="background:var(--info)"></div>
+      <p class="watch-name">XLB · XLU RSI趋向超卖</p>
+      <p class="watch-note">关注反弹机会，若RSI<35可布局</p>
+      <span class="watch-date">May 18, 2026</span>
+    </div>
+    <div class="watch-item">
+      <div class="watch-dot" style="background:var(--warn)"></div>
+      <p class="watch-name">XLK RSI偏高 72.5</p>
+      <p class="watch-note">领涨板块技术面偏热，谨慎追高</p>
+      <span class="watch-date">May 18, 2026</span>
+    </div></div>
+<div style="margin-top:20px">
+  <div class="strategy fade-in">
+    <div class="strategy-icon">🎯</div>
+    <div>
+      <p class="strategy-title">Today's Strategy Recommendation</p>
+      <p class="strategy-body">Continue regular investment · Cautious buying · Manage position size<br>规避超买板块: XLK<br>关注超卖反弹机会: XLB, XLU</p>
+    </div>
+  </div>
+</div>
+
+</div>
+<footer class="page-footer">
+  <p>DATA SOURCES: yfinance · FRED (Federal Reserve) · alternative.me · pizzint.watch · CBOE · BLS · ISM · CME</p>
+  <p>RSI及技术指标由实时数据计算 · 大宗商品趋势图基于实际价格数据 · 本报告为自动生成，仅供信息参考，不构成任何投资建议</p>
+  <p style="margin-top:6px;color:rgba(255,255,255,0.15)">Auto-generated · May 18, 2026 — 06:00 UTC</p>
+</footer>
+<script>
+Chart.defaults.color='rgba(255,255,255,0.45)';
+Chart.defaults.borderColor='rgba(255,255,255,0.07)';
+function sparkline(id,data,color,fill){
+  const el=document.getElementById(id);if(!el||!data.length)return;
+  new Chart(el,{type:'line',
+    data:{labels:data.map((_,i)=>i),datasets:[{data,borderColor:color,borderWidth:1.5,pointRadius:0,tension:.4,fill:true,backgroundColor:fill}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{display:false},tooltip:{enabled:false}},
+      scales:{x:{display:false},y:{display:false}}}
+  });
+}
+sparkline('spxChart',[2066.66, 2144.29, 2358.57, 2471.65, 2581.0, 2809.55, 2467.42, 2752.06, 3078.27, 2761.63, 3357.01, 3925.43, 4395.26, 4793.54, 3749.63, 3958.79, 4055.99, 4229.45, 5117.94, 5543.22, 6101.24, 6227.42, 6870.4, 7408.5],'#22d87c','rgba(34,216,124,0.12)');
+sparkline('ndxChart',[4380.48, 4836.61, 5407.21, 5988.6, 6306.1, 7403.89, 6243.19, 7127.96, 8210.66, 8332.74, 11080.95, 13302.19, 14959.9, 16279.73, 11288.32, 11699.09, 12806.48, 14565.62, 17951.69, 19490.15, 21774.01, 22641.89, 25692.05, 29125.2],'#4e9eff','rgba(78,158,255,0.12)');
+sparkline('soxChart',[4780.93, 5112.24, 5732.62, 5630.82, 6308.21, 6976.94, 6899.46, 7083.13, 7619.16, 7865.12, 9039.52, 11588.46],'#4e9eff','rgba(78,158,255,0.12)');
+sparkline('soxxChart',[206.55, 219.56, 245.7, 242.72, 268.95, 295.25, 290.78, 300.96, 330.18, 338.6, 393.34, 508.52],'#4e9eff','rgba(78,158,255,0.12)');
+</script>
+</body>
+</html>
