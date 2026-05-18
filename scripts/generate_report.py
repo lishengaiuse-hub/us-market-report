@@ -771,6 +771,240 @@ def render_watchlist(data: dict) -> str:
 
 
 # ─────────────────────────────────────────────
+# CHINA A-SHARE RENDERERS
+# ─────────────────────────────────────────────
+
+# Colors for the 5 CN indices (kept consistent across all charts)
+_CN_COLORS = ["#f5a623", "#4e9eff", "#22d87c", "#c8a96e", "#b06aff"]
+_CN_FILLS  = ["rgba(245,166,35,0.12)", "rgba(78,158,255,0.12)",
+              "rgba(34,216,124,0.12)", "rgba(200,169,110,0.12)",
+              "rgba(176,106,255,0.12)"]
+
+
+def render_cn_indices(cn_indices: list) -> str:
+    def idx_card(d, color, canvas_id):
+        price   = fmt(d.get("price"), 2)
+        chg     = d.get("change_pct")
+        chg_col = "up" if chg and chg >= 0 else "dn"
+        sign    = "▲" if chg and chg >= 0 else "▽"
+        chg_str = f"{sign} {fmt(abs(chg) if chg else 0, 2)}%" if chg is not None else "N/A"
+        rsi     = d.get("rsi")
+        ytd     = d.get("ytd")
+        pe      = fmt(d.get("pe"), 2, fallback="")
+        ytd_str = ("+"+fmt(ytd,1,suffix="%")) if ytd and ytd>=0 else fmt(ytd,1,suffix="%") if ytd else "N/A"
+        pe_line = f"<p class='card-sub' style='margin-top:2px'>P/E: <strong>{pe}</strong></p>" if pe else ""
+        return f"""
+  <div class="card" style="padding-bottom:0">
+    <p style="font-size:12px;font-weight:700;color:{color};margin-bottom:1px">{d['name_cn']}</p>
+    <p style="font-size:9px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:4px">{d['name_en']}</p>
+    <p style="font-family:'DM Serif Display',serif;font-size:22px;margin:3px 0 2px">
+      {price} <span style="font-size:13px;color:var(--{chg_col})">{chg_str}</span>
+    </p>
+    <p class="card-sub">YTD <strong class="{pct_color(ytd)}">{ytd_str}</strong></p>
+    <p class="card-sub" style="margin-top:2px">RSI(14): <strong class="{rsi_color(rsi)}">{fmt(rsi,1,fallback="N/A")}</strong> {rsi_badge(rsi)}</p>
+    {pe_line}
+    <div class="sparkline-area"><canvas id="{canvas_id}"></canvas></div>
+    <p class="sparkline-lbl">12-Month Trend</p>
+  </div>"""
+
+    cards = [idx_card(d, col, f"cn_{d['symbol'].replace('.','_')}")
+             for d, col in zip(cn_indices, _CN_COLORS)]
+    rows  = ""
+    if len(cards) >= 3:
+        rows += f'<div class="grid-3 fade-in">{"".join(cards[:3])}</div>'
+    if len(cards) >= 5:
+        rows += f'<div class="grid-2 fade-in" style="margin-top:12px">{"".join(cards[3:5])}</div>'
+
+    js = ""
+    for d, col, fill in zip(cn_indices, _CN_COLORS, _CN_FILLS):
+        cid   = f"cn_{d['symbol'].replace('.','_')}"
+        trend = d.get("trend_1y") or []
+        js   += f"\nsparkline('{cid}',{json.dumps(trend)},'{col}','{fill}');"
+
+    return f"{rows}<script>(function(){{{js}}})();</script>"
+
+
+def render_cn_rsi(cn_indices: list) -> str:
+    srt    = sorted(cn_indices, key=lambda x: x.get("rsi") or 50, reverse=True)
+    labels = json.dumps([f"{d['symbol']} {d['name_cn']}" for d in srt])
+    vals   = json.dumps([round(d.get("rsi") or 50, 1) for d in srt])
+    colors = json.dumps([
+        "#f05252" if (d.get("rsi") or 50) >= 70 else
+        "#f5a623" if (d.get("rsi") or 50) >= 60 else
+        "#556677" if (d.get("rsi") or 50) >= 40 else
+        "#4e9eff" for d in srt
+    ])
+    return f"""
+<div class="card fade-in"><div style="height:200px;position:relative"><canvas id="cnRsiChart"></canvas></div></div>
+<script>(function(){{
+  new Chart(document.getElementById('cnRsiChart'),{{
+    type:'bar',
+    data:{{labels:{labels},datasets:[{{label:'RSI(14)',data:{vals},backgroundColor:{colors},borderRadius:5,borderSkipped:false}}]}},
+    options:{{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{{legend:{{display:false}},tooltip:{{callbacks:{{label:c=>' RSI: '+c.raw.toFixed(1)}}}}}},
+      scales:{{x:{{min:0,max:100,grid:{{color:'rgba(255,255,255,0.05)'}}}},
+               y:{{grid:{{display:false}},border:{{display:false}}}}}}
+    }},
+    plugins:[{{afterDraw(c){{
+      const ctx=c.ctx,xs=c.scales.x,ys=c.scales.y;
+      [{{v:70,col:'rgba(240,82,82,0.7)',lbl:'超买 70'}},{{v:30,col:'rgba(78,158,255,0.7)',lbl:'超卖 30'}}].forEach(o=>{{
+        const x=xs.getPixelForValue(o.v);
+        ctx.save();ctx.beginPath();ctx.moveTo(x,ys.top);ctx.lineTo(x,ys.bottom);
+        ctx.strokeStyle=o.col;ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.stroke();
+        ctx.fillStyle=o.col;ctx.font='bold 9px monospace';ctx.fillText(o.lbl,x+3,ys.top+11);
+        ctx.restore();
+      }});
+    }}}}]
+  }});
+}})();</script>"""
+
+
+def render_cn_sectors(cn_sectors: list) -> str:
+    srt    = sorted(cn_sectors, key=lambda x: x.get("ytd") or 0, reverse=True)
+    labels = json.dumps([s["name_cn"] for s in srt])
+    ytds   = json.dumps([round(s.get("ytd") or 0, 1) for s in srt])
+    colors = json.dumps(["#22d87c" if (s.get("ytd") or 0) >= 0 else "#f05252" for s in srt])
+
+    rows = ""
+    for s in srt:
+        ytd, rsi, price = s.get("ytd"), s.get("rsi"), s.get("price")
+        ytd_str = ("+"+fmt(ytd,1,suffix="%")) if ytd and ytd>=0 else fmt(ytd,1,suffix="%") if ytd else "N/A"
+        rows += f"""
+        <tr>
+          <td><strong style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">{s['symbol']}</strong></td>
+          <td style="font-weight:500">{s['name_cn']}</td>
+          <td style="color:var(--text2)">{s['sector_label']}</td>
+          <td style="text-align:right;color:var(--{"up" if (ytd or 0)>=0 else "dn"});font-weight:600">
+            ¥{fmt(price,3,fallback="N/A")}</td>
+          <td style="text-align:right;color:var(--{"up" if (ytd or 0)>=0 else "dn"});font-weight:600">
+            {ytd_str}</td>
+          <td>{sector_bar_html(ytd)}</td>
+          <td style="font-family:'DM Mono',monospace;color:{rsi_color(rsi)};font-weight:500">{fmt(rsi,1,fallback="N/A")}</td>
+          <td>{momentum_badge(s.get("momentum","Neutral"))}</td>
+        </tr>"""
+
+    return f"""
+<div class="card fade-in" style="margin-bottom:12px">
+  <div style="height:240px;position:relative"><canvas id="cnSectorChart"></canvas></div>
+</div>
+<div class="card fade-in">
+  <table class="sector-table">
+    <thead><tr><th>代码</th><th>ETF</th><th>板块</th>
+      <th style="text-align:right">价格(¥)</th><th style="text-align:right">YTD</th>
+      <th>走势</th><th>RSI(14)</th><th>动能</th></tr></thead>
+    <tbody>{rows}</tbody>
+  </table>
+</div>
+<script>(function(){{
+  new Chart(document.getElementById('cnSectorChart'),{{
+    type:'bar',
+    data:{{labels:{labels},datasets:[{{label:'YTD %',data:{ytds},backgroundColor:{colors},borderRadius:5,borderSkipped:false}}]}},
+    options:{{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{{legend:{{display:false}},tooltip:{{callbacks:{{label:c=>' '+(c.raw>=0?'+':'')+c.raw.toFixed(1)+'%'}}}}}},
+      scales:{{x:{{grid:{{color:'rgba(255,255,255,0.05)'}},ticks:{{callback:v=>(v>=0?'+':'')+v+'%'}}}},
+               y:{{grid:{{display:false}},border:{{display:false}}}}}}
+    }},
+    plugins:[{{afterDraw(c){{
+      const ctx=c.ctx,xs=c.scales.x,ys=c.scales.y;
+      const x0=xs.getPixelForValue(0);
+      ctx.save();ctx.beginPath();ctx.moveTo(x0,ys.top);ctx.lineTo(x0,ys.bottom);
+      ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.stroke();
+      ctx.restore();
+    }}}}]
+  }});
+}})();</script>"""
+
+
+def render_cn_macro(cn_macro: dict) -> str:
+    usdcny      = cn_macro.get("usdcny")
+    usdcny_date = cn_macro.get("usdcny_date") or cn_macro.get("date", "")
+    cn10y       = cn_macro.get("cn10y")
+    lpr         = cn_macro.get("lpr")
+
+    usdcny_left = pin_pct(usdcny, 6.5, 7.5)
+    cn10y_left  = pin_pct(cn10y, 0, 6) if cn10y else "50%"
+
+    if usdcny and usdcny > 7.25:
+        usdcny_badge = '<span class="badge b-dn">人民币偏弱</span>'
+        usdcny_col   = "dn"
+    elif usdcny and usdcny < 7.0:
+        usdcny_badge = '<span class="badge b-up">人民币偏强</span>'
+        usdcny_col   = "up"
+    else:
+        usdcny_badge = '<span class="badge b-neutral">中性</span>'
+        usdcny_col   = "nt"
+
+    lpr_line = f"&nbsp;·&nbsp; LPR(1Y): <strong>{fmt(lpr,2,suffix='%')}</strong>" if lpr else ""
+
+    return f"""
+<div class="grid-2 fade-in">
+  <div class="card card-sm gauge">
+    <p class="gauge-name">美元/人民币 USD/CNY {usdcny_badge}</p>
+    <p class="gauge-val {usdcny_col}">{fmt(usdcny, 4, fallback="N/A")}</p>
+    <p class="gauge-date">{usdcny_date}{lpr_line}</p>
+    <div class="gbar">
+      <div class="gs" style="width:25%;background:#22d87c"></div>
+      <div class="gs" style="width:50%;background:#f5a623"></div>
+      <div class="gs" style="width:25%;background:#f05252"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:{usdcny_left}"></div></div>
+    <div class="glbls"><span>6.5 人民币强</span><span>7.0 中性</span><span>7.5 人民币弱</span></div>
+  </div>
+  <div class="card card-sm gauge">
+    <p class="gauge-name">中国10年期国债收益率 <span class="badge b-neutral">{'实时' if cn10y else 'N/A'}</span></p>
+    <p class="gauge-val nt">{fmt(cn10y, 2, suffix="%", fallback="N/A")}</p>
+    <p class="gauge-date">{cn_macro.get("cn10y_date","") or cn_macro.get("date","")}</p>
+    <div class="gbar">
+      <div class="gs" style="width:33%;background:#22d87c"></div>
+      <div class="gs" style="width:34%;background:#f5a623"></div>
+      <div class="gs" style="width:33%;background:#f05252"></div>
+    </div>
+    <div class="mwrap"><div class="mkr" style="left:{cn10y_left}"></div></div>
+    <div class="glbls"><span>&lt;2% 低</span><span>2–3.5% 正常</span><span>&gt;3.5% 偏高</span></div>
+  </div>
+</div>"""
+
+
+def sec_cn(label, title):
+    return (f'<div class="sec" style="--accent:#f87171">'
+            f'<span class="sec-num" style="color:#f87171;border-color:rgba(248,113,113,0.3)">{label}</span>'
+            f'<span class="sec-title">{title}</span>'
+            f'<div class="sec-line"></div></div>')
+
+
+def render_cn_page(data: dict) -> str:
+    cn_indices = data.get("cn_indices", [])
+    cn_sectors = data.get("cn_sectors", [])
+    cn_macro   = data.get("cn_macro", {})
+
+    return f"""
+<div style="background:linear-gradient(135deg,rgba(220,38,38,0.1),rgba(220,38,38,0.03));
+            border:1px solid rgba(248,113,113,0.2);border-radius:12px;
+            padding:18px 22px;margin:48px 0 8px;display:flex;align-items:center;gap:14px">
+  <span style="font-size:30px">🇨🇳</span>
+  <div>
+    <p style="font-family:'DM Serif Display',serif;font-size:20px;color:#f87171;margin-bottom:3px">中国A股市场</p>
+    <p style="font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;letter-spacing:.1em">
+      CHINA A-SHARE MARKET INTELLIGENCE &nbsp;·&nbsp; {data.get("report_date","")}
+    </p>
+  </div>
+</div>
+
+{sec_cn("Ⓐ", "五大核心指数快照 — 上证 · 深证 · 创业板 · 沪深300 · 科创50")}
+{render_cn_indices(cn_indices)}
+
+{sec_cn("Ⓑ", "技术信号 RSI 概览 — 超买 / 超卖排名")}
+{render_cn_rsi(cn_indices)}
+
+{sec_cn("Ⓒ", "主要板块ETF表现 — A股8大板块 YTD")}
+{render_cn_sectors(cn_sectors)}
+
+{sec_cn("Ⓓ", "宏观参考指标 — 人民币汇率 · 国债收益率")}
+{render_cn_macro(cn_macro)}
+"""
+
+
+# ─────────────────────────────────────────────
 # FULL HTML ASSEMBLY
 # ─────────────────────────────────────────────
 
@@ -779,7 +1013,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>U.S. Market Report — {report_date}</title>
+<title>U.S. & A-Share Market Report — {report_date}</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -898,9 +1132,9 @@ hr.div{{border:none;border-top:1px solid var(--border);margin:28px 0}}
 <header class="page-header">
   <div class="header-top">
     <div>
-      <p class="report-eyebrow">Daily Briefing · United States</p>
+      <p class="report-eyebrow">Weekly Briefing · United States &amp; China A-Share</p>
       <h1 class="report-title">Market Sentiment &amp; Macro Intelligence Report</h1>
-      <p class="report-sub">Indices · Volatility · Macro · Sectors · Semiconductors · Commodities · PizzINT</p>
+      <p class="report-sub">U.S. Indices · Volatility · Macro · Sectors · Semis · Commodities · PizzINT &nbsp;|&nbsp; 🇨🇳 A股指数 · 板块ETF · 人民币</p>
     </div>
     <div class="report-date">
       <p class="date-num">{report_date}</p>
@@ -941,9 +1175,11 @@ hr.div{{border:none;border-top:1px solid var(--border);margin:28px 0}}
 <div class="sec"><span class="sec-num">⑫</span><span class="sec-title">Priority Watchlist &amp; Strategy</span><div class="sec-line"></div></div>
 {sec_watchlist}
 
+{sec_cn_page}
+
 </div>
 <footer class="page-footer">
-  <p>DATA SOURCES: yfinance · FRED (Federal Reserve) · alternative.me · pizzint.watch · CBOE · BLS · ISM · CME</p>
+  <p>DATA SOURCES: yfinance · FRED (Federal Reserve) · alternative.me · pizzint.watch · CBOE · BLS · ISM · CME · SSE · SZSE</p>
   <p>RSI及技术指标由实时数据计算 · 大宗商品趋势图基于实际价格数据 · 本报告为自动生成，仅供信息参考，不构成任何投资建议</p>
   <p style="margin-top:6px;color:rgba(255,255,255,0.15)">Auto-generated · {generated_at}</p>
 </footer>
@@ -994,6 +1230,7 @@ def generate(data: dict) -> str:
         sec_semi=render_semiconductor(semi),
         sec_commodities=render_commodities(comms),
         sec_watchlist=render_watchlist(data),
+        sec_cn_page=render_cn_page(data),
         spx_trend=json.dumps(spx.get("trend_10y") or []),
         ndx_trend=json.dumps(ndx.get("trend_10y") or []),
         sox_trend=json.dumps(semi.get("sox_trend") or []),

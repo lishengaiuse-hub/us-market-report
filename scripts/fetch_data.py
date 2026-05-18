@@ -348,6 +348,111 @@ def fetch_pizza_index() -> dict:
 
 
 # ─────────────────────────────────────────────
+# CHINA A-SHARE FETCHERS
+# ─────────────────────────────────────────────
+
+CN_INDICES = [
+    ("000001.SS", "上证指数", "SSE Composite"),
+    ("399001.SZ", "深证成指", "SZSE Component"),
+    ("399006.SZ", "创业板指", "ChiNext"),
+    ("000300.SS", "沪深300",  "CSI 300"),
+    ("000688.SS", "科创50",   "STAR 50"),
+]
+
+CN_SECTORS = [
+    # (symbol, name_cn, sector_label)
+    ("510300.SS", "沪深300ETF", "大盘蓝筹"),
+    ("159915.SZ", "创业板ETF",  "成长科技"),
+    ("512010.SS", "医药ETF",    "医药生物"),
+    ("512690.SS", "酒ETF",      "消费白酒"),
+    ("515000.SS", "科技ETF",    "信息技术"),
+    ("512200.SS", "地产ETF",    "房地产"),
+    ("512400.SS", "有色ETF",    "有色金属"),
+    ("516160.SS", "新能源车ETF","新能源汽车"),
+]
+
+
+def fetch_cn_index(symbol: str, name_cn: str, name_en: str) -> dict:
+    log.info(f"Fetching CN index: {symbol}")
+    tk = yf.Ticker(symbol)
+    hist_1y  = safe(lambda: tk.history(start=TWELVE_MONTHS_AGO), pd.DataFrame())
+    hist_ytd = safe(lambda: tk.history(start=YEAR_START), pd.DataFrame())
+    info     = safe(lambda: tk.info, {})
+
+    price    = safe(lambda: round(float(hist_1y["Close"].iloc[-1]), 2))
+    prev     = safe(lambda: float(hist_1y["Close"].iloc[-2]))
+    chg_pct  = round((price - prev) / prev * 100, 2) if price and prev else None
+    rsi      = calculate_rsi(hist_1y["Close"].tolist() if not hist_1y.empty else [])
+    pe       = safe(lambda: round(float(info.get("trailingPE") or 0), 2)) or None
+    ytd      = ytd_pct(hist_ytd)
+    trend_1y = twelve_month_trend(hist_1y, n_points=12)
+
+    return {
+        "symbol": symbol, "name_cn": name_cn, "name_en": name_en,
+        "price": price, "change_pct": chg_pct, "pe": pe,
+        "rsi": rsi, "ytd": ytd, "trend_1y": trend_1y,
+        "date": TODAY.strftime("%b %d, %Y"),
+    }
+
+
+def fetch_cn_sector(symbol: str, name_cn: str, sector_label: str) -> dict:
+    log.info(f"Fetching CN sector ETF: {symbol}")
+    tk       = yf.Ticker(symbol)
+    hist_1y  = safe(lambda: tk.history(start=TWELVE_MONTHS_AGO), pd.DataFrame())
+    hist_ytd = safe(lambda: tk.history(start=YEAR_START), pd.DataFrame())
+
+    price = safe(lambda: round(float(hist_1y["Close"].iloc[-1]), 3))
+    rsi   = calculate_rsi(hist_1y["Close"].tolist() if not hist_1y.empty else [])
+    ytd   = ytd_pct(hist_ytd)
+
+    if rsi and ytd is not None:
+        if   rsi > 55 and ytd > 5:  momentum = "Leading"
+        elif rsi > 50 and ytd > 0:  momentum = "Improving"
+        elif rsi < 45 and ytd < 0:  momentum = "Lagging"
+        else:                        momentum = "Weakening"
+    else:
+        momentum = "Neutral"
+
+    return {
+        "symbol": symbol, "name_cn": name_cn, "sector_label": sector_label,
+        "price": price, "ytd": ytd, "rsi": rsi, "momentum": momentum,
+    }
+
+
+def fetch_cn_macro() -> dict:
+    log.info("Fetching CN macro: USDCNY + CN 10Y yield")
+
+    # USD/CNY spot rate
+    usdcny, usdcny_date = None, None
+    h = safe(lambda: yf.Ticker("USDCNY=X").history(period="5d"), pd.DataFrame())
+    if h is not None and not h.empty:
+        usdcny      = round(float(h["Close"].iloc[-1]), 4)
+        usdcny_date = h.index[-1].strftime("%Y-%m-%d")
+
+    # China 10-Year government bond yield — try several possible tickers
+    cn10y, cn10y_date = None, None
+    for ticker in ["^CNYBMK10Y", "CN10YT=RR", "CNYCGB10Y=X", "^CNYB10Y"]:
+        try:
+            h2 = yf.Ticker(ticker).history(period="5d")
+            if not h2.empty:
+                cn10y      = round(float(h2["Close"].iloc[-1]), 2)
+                cn10y_date = h2.index[-1].strftime("%Y-%m-%d")
+                break
+        except Exception:
+            pass
+
+    # PBOC 1-Year LPR — not on yfinance; use FRED if key available
+    lpr, lpr_date = fred("INTDSRCNM193N") if FRED_API_KEY else (None, None)
+
+    return {
+        "usdcny": usdcny, "usdcny_date": usdcny_date,
+        "cn10y":  cn10y,  "cn10y_date":  cn10y_date,
+        "lpr":    lpr,    "lpr_date":    lpr_date,
+        "date":   TODAY.strftime("%b %d, %Y"),
+    }
+
+
+# ─────────────────────────────────────────────
 # MAIN ORCHESTRATOR
 # ─────────────────────────────────────────────
 
@@ -418,6 +523,20 @@ def run() -> dict:
 
     # Pizza Index
     data["pizza"] = fetch_pizza_index()
+
+    # ── China A-Share ──────────────────────────────────────────────
+    data["cn_indices"] = []
+    for sym, cn, en in CN_INDICES:
+        data["cn_indices"].append(fetch_cn_index(sym, cn, en))
+        time.sleep(0.3)
+
+    data["cn_sectors"] = []
+    for sym, name_cn, sector_label in CN_SECTORS:
+        data["cn_sectors"].append(fetch_cn_sector(sym, name_cn, sector_label))
+        time.sleep(0.3)
+
+    data["cn_macro"] = fetch_cn_macro()
+    time.sleep(0.3)
 
     # Report metadata
     data["generated_at"] = TODAY.strftime("%b %d, %Y — %H:%M UTC")
